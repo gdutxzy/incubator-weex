@@ -36,6 +36,22 @@ typedef BOOL (^WXModuleInterceptCallback)(NSString *moduleName, NSString *method
 
 @interface WXSDKInstance : NSObject
 
+///*********************************************************************///
+/**
+ 自定义  start
+ */
+@property (nonatomic, weak) NSDictionary *param;
+@property (nonatomic) BOOL isInit;
+@property (nonatomic) BOOL isFirePageInit;
+@property (nonatomic, strong) NSMutableArray *childInstance;
+
+-(void)firePageInit;
+/**
+ 自定义  end
+ */
+///*********************************************************************///
+
+
 /**
  * Init instance and render it using iOS native views.
  * It is the same as initWithRenderType:@"platform"

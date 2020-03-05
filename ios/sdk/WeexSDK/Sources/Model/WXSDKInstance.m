@@ -90,6 +90,62 @@ typedef enum : NSUInteger {
     NSMutableDictionary *_moduleIntercepts;
 }
 
+
+
+///*********************************************************************///
+/**
+ 自定义  start
+ */
+//
+static NSString * appBoardContent;
+-(void)firePageInit {
+    if(self.isFirePageInit)
+    {
+        return;
+    }
+    
+    if(self.parentInstance!=nil)
+    {
+        if(self.parentInstance.isFirePageInit)
+        {
+            [self fireSelfPageInit];
+        }
+    }
+    else
+    {
+        [self fireSelfPageInit];
+    }
+}
+
+-(void)fireSelfPageInit
+{
+    self.isFirePageInit=true;
+    [self fireGlobalEvent:@"onPageInit" params:self.param];
+    if(self.childInstance!=nil)
+    {
+        for(WXSDKInstance *instance in self.childInstance)
+        {
+            [instance firePageInit];
+        }
+    }
+}
+
+- (NSString*)getCommonJSString{
+    NSString *rootPath = self.scriptURL.absoluteString;
+    NSArray *n = [rootPath componentsSeparatedByString:@"/dist/"];
+    rootPath =[n.firstObject stringByAppendingString:@"/dist/"] ;
+    NSString * commonPath = [[rootPath stringByAppendingString:@"common.js"] stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+    NSData *commonData = [NSData dataWithContentsOfFile:commonPath];
+    NSString *commonJS = [[NSString alloc] initWithData:commonData encoding:NSUTF8StringEncoding];
+    return commonJS;
+}
+
+/**
+ 自定义  end
+ */
+///*********************************************************************///
+
+
 - (void)dealloc
 {
     [_moduleEventObservers removeAllObjects];
@@ -745,6 +801,8 @@ typedef enum : NSUInteger {
         }
 
         NSString *jsBundleString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSString *commonJS = [strongSelf getCommonJSString];
+        jsBundleString = [commonJS stringByAppendingString:jsBundleString];
         if (!jsBundleString) {
             WX_MONITOR_FAIL_ON_PAGE(WXMTJSDownload, WX_ERR_JSBUNDLE_STRING_CONVERT, @"data converting to string failed.", strongSelf.pageName)
             [strongSelf.apmInstance setProperty:KEY_PROPERTIES_ERROR_CODE withValue:[@(WX_ERR_JSBUNDLE_STRING_CONVERT) stringValue]];
